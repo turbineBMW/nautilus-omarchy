@@ -41,6 +41,57 @@ Adw.PreferencesDialog preferences_dialog {
       }
     }
 
+    // fork: Omarchy appearance (src/omarchy/nautilus-omarchy-theme.c)
+    Adw.PreferencesGroup {
+      title: _("Appearance");
+
+      Adw.SwitchRow follow_omarchy_theme_row {
+        title: _("Follow Omarchy T_heme");
+        use-underline: true;
+      }
+
+      Adw.SwitchRow transparent_sidebar_row {
+        title: _("Trans_parent Sidebar");
+        subtitle: _("Show the desktop behind the sidebar");
+        use-underline: true;
+      }
+
+      Adw.ActionRow sidebar_opacity_row {
+        title: _("Sidebar Opacit_y");
+        use-underline: true;
+        activatable-widget: sidebar_opacity_scale;
+
+        [suffix]
+        Scale sidebar_opacity_scale {
+          valign: center;
+          hexpand: true;
+          width-request: 160;
+          draw-value: true;
+          value-pos: left;
+          digits: 2;
+
+          adjustment: Adjustment {
+            lower: 0;
+            upper: 1;
+            step-increment: 0.05;
+            page-increment: 0.1;
+          };
+        }
+
+        [suffix]
+        Button sidebar_opacity_reset_button {
+          valign: center;
+          icon-name: "edit-undo-symbolic";
+          tooltip-text: _("Reset to Default");
+
+          styles [
+            "flat",
+          ]
+        }
+      }
+    }
+    // end fork
+
     Adw.PreferencesGroup {
       title: _("Optional Context Menu Actions");
       description: _(

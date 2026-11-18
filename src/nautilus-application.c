@@ -68,6 +68,7 @@
 #include "nautilus-trash-monitor.h"
 #include "nautilus-ui-utilities.h"
 #include "nautilus-window.h"
+#include "omarchy/nautilus-omarchy-theme.h" /* fork */
 
 struct _NautilusApplication
 {
@@ -1079,6 +1080,9 @@ nautilus_application_startup (GApplication *app)
 
     /* initialize preferences and create the global GSettings objects */
     nautilus_global_preferences_init ();
+
+    /* fork: follow the Omarchy theme; optional transparent sidebar */
+    nautilus_omarchy_theme_init (GTK_APPLICATION (self));
 
     /* initialize data preference watchers */
     nautilus_date_setup_preferences ();

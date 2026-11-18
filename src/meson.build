@@ -282,6 +282,11 @@ libnautilus_sources = [
   'nautilus-view-model.c',
   'nautilus-view-model.h',
   'nautilus-window.c',
+  # fork: Omarchy appearance
+  'omarchy/nautilus-omarchy-palette.c',
+  'omarchy/nautilus-omarchy-palette.h',
+  'omarchy/nautilus-omarchy-theme.c',
+  'omarchy/nautilus-omarchy-theme.h',
   'nautilus-window.h',
   'nautilus-window-slot.c',
   'nautilus-window-slot.h',

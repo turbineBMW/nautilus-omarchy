@@ -32,6 +32,7 @@
 #include "nautilus-column-utilities.h"
 #include "nautilus-date-utilities.h"
 #include "nautilus-global-preferences.h"
+#include "omarchy/nautilus-omarchy-theme.h" /* fork */
 
 /* bool preferences */
 #define NAUTILUS_PREFERENCES_DIALOG_FOLDERS_FIRST_WIDGET                       \
@@ -213,6 +214,9 @@ nautilus_preferences_dialog_setup (GtkBuilder *builder)
                             NAUTILUS_PREFERENCES_DIALOG_COUNT_ROW,
                             NAUTILUS_PREFERENCES_SHOW_DIRECTORY_ITEM_COUNTS,
                             (const char **) speed_tradeoff_values);
+
+    /* fork: Appearance group */
+    nautilus_omarchy_preferences_setup (builder);
 }
 
 void

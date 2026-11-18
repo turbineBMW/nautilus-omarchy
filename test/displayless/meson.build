@@ -22,6 +22,8 @@ tests = {
   'test-nautilus-search-engine-model': {},
   'test-nautilus-search-engine-simple': {},
   'test-ui-utilities': {},
+  # fork: Omarchy palette
+  'test-omarchy-palette': {},
 }
 
 foreach test_name, extra_args : tests
