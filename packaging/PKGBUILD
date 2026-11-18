@@ -1,0 +1,90 @@
+# Files (Nautilus) with Omarchy theming and an optional transparent sidebar.
+#
+# Built from this checkout's working tree, not a fresh clone: the repository
+# is a partial clone of upstream, and the fork is personal. Replaces the
+# stock `nautilus` package; Arch's `libnautilus-extension` stays installed,
+# since the fork does not touch the extension library.
+#
+#   cd packaging && makepkg -f        (or ../install.sh)
+
+pkgname=nautilus-omarchy
+pkgver=51.1
+pkgrel=1
+pkgdesc="Default file manager for GNOME, following the Omarchy theme"
+url="https://apps.gnome.org/Nautilus/"
+arch=(x86_64)
+license=(GPL-3.0-or-later)
+depends=(
+  cairo
+  dconf
+  gdk-pixbuf2
+  gexiv2
+  glib2
+  glibc
+  glycin
+  glycin-gtk4
+  gnome-autoar
+  gnome-desktop-4
+  graphene
+  gst-plugins-base-libs
+  gstreamer
+  gtk4
+  gvfs
+  hicolor-icon-theme
+  icu
+  libadwaita
+  libcloudproviders
+  libgcc
+  libportal
+  libportal-gtk4
+  libx11
+  localsearch
+  pango
+  tinysparql
+  wayland
+  xdg-user-dirs-gtk
+  libnautilus-extension.so
+)
+makedepends=(
+  appstream
+  blueprint-compiler
+  git
+  glib2-devel
+  meson
+)
+provides=("nautilus=${pkgver%%.r*}")
+conflicts=(nautilus)
+options=(!debug)
+
+_src=$(realpath "${startdir:-$PWD}/..")
+
+pkgver() {
+  # The upstream release the fork sits on, then the fork's own commits:
+  # 51.1.r3.g1a2b3c4.
+  git -C "$_src" describe --tags --long --match '[0-9]*' \
+    | sed 's/-\([0-9]*\)-g/.r\1.g/'
+}
+
+build() {
+  arch-meson "$_src" build \
+    -D docs=false \
+    -D introspection=false \
+    -D packagekit=false \
+    -D selinux=false \
+    -D tests=none
+  meson compile -C build
+}
+
+package() {
+  meson install -C build --no-rebuild --destdir "$pkgdir"
+
+  # Owned by Arch's libnautilus-extension, which stays installed.
+  cd "$pkgdir"
+  rm -rf usr/include usr/lib/pkgconfig usr/share/gir-1.0 usr/share/doc
+  rm -f usr/lib/libnautilus-extension*
+
+  # Upstream installs these with the API docs, which are not built here.
+  install -Dm644 "$_src"/docs/{nautilus,nautilus-autorun-software}.1 -t usr/share/man/man1
+}
+
+# vim:set sw=2 sts=-1 et:
