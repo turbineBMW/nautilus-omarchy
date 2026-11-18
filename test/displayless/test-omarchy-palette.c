@@ -1,62 +1,11 @@
 /* fork: tests for src/omarchy/nautilus-omarchy-palette.c.
  * The palette itself is checked byte for byte against Bubo's Rust
- * implementation; see FORK.md. These pin the behaviour that matters most. */
+ * implementation; see FORK.md. These pin the behaviour that matters most.
+ * (The sidebar's opacity is a setting, not part of the palette.) */
 #include <glib.h>
 #include <string.h>
 
 #include "omarchy/nautilus-omarchy-palette.h"
-
-static void
-assert_opacity (const char *css,
-                double      expected)
-{
-    double opacity = -1.0;
-
-    g_assert_true (nautilus_omarchy_sidebar_opacity_in (css, &opacity));
-    g_assert_cmpfloat_with_epsilon (opacity, expected, 1e-9);
-}
-
-static void
-test_opacity_last_value_wins (void)
-{
-    assert_opacity ("/* --nautilus-sidebar-opacity: 0.1; */\n"
-                    ":root {\n  --nautilus-sidebar-opacity: 0.8;\n}\n"
-                    "window { --nautilus-sidebar-opacity:0.6 }\n", 0.6);
-    assert_opacity (":root { --nautilus-sidebar-opacity: 1; }", 1.0);
-}
-
-static void
-test_opacity_clamped (void)
-{
-    assert_opacity (":root { --nautilus-sidebar-opacity: 2; }", 1.0);
-    assert_opacity (":root { --nautilus-sidebar-opacity: -0.5; }", 0.0);
-}
-
-static void
-test_opacity_garbage_ignored (void)
-{
-    const char *cases[] =
-    {
-        "",
-        ":root { --nautilus-sidebar-opacity: lots; }",
-        ":root { --nautilus-sidebar-opacity: NaN; }",
-        ":root { --nautilus-sidebar-opacity: inf; }",
-        /* GTK's alpha() rejects a percentage. */
-        ":root { --nautilus-sidebar-opacity: 75%; }",
-        ":root { --nautilus-sidebar-opacity-x: 0.5; }",
-        ":root { --x--nautilus-sidebar-opacity: 0.5; }",
-        ".sidebar-pane { opacity: var(--nautilus-sidebar-opacity); }",
-        "/* --nautilus-sidebar-opacity: 0.5",
-        /* A later declaration replaces an earlier one, usable or not. */
-        ":root { --nautilus-sidebar-opacity: 0.5; }\n"
-        ":root { --nautilus-sidebar-opacity: lots; }",
-    };
-
-    for (guint i = 0; i < G_N_ELEMENTS (cases); i++)
-    {
-        g_assert_false (nautilus_omarchy_sidebar_opacity_in (cases[i], NULL));
-    }
-}
 
 static void
 test_palette_mode_and_colours (void)
@@ -109,9 +58,6 @@ main (int   argc,
 {
     g_test_init (&argc, &argv, NULL);
 
-    g_test_add_func ("/omarchy/opacity/last-value-wins", test_opacity_last_value_wins);
-    g_test_add_func ("/omarchy/opacity/clamped", test_opacity_clamped);
-    g_test_add_func ("/omarchy/opacity/garbage-ignored", test_opacity_garbage_ignored);
     g_test_add_func ("/omarchy/palette/mode-and-colours", test_palette_mode_and_colours);
     g_test_add_func ("/omarchy/palette/legacy-and-light-file", test_palette_legacy_and_light_file);
     g_test_add_func ("/omarchy/palette/rejects-injection", test_palette_rejects_injection);

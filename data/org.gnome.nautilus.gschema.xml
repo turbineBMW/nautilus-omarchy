@@ -117,7 +117,7 @@
       <range min="0" max="1"/>
       <default>0.8</default>
       <summary>Sidebar opacity</summary>
-      <description>How opaque the transparent sidebar is, from 0 (clear) to 1 (solid). While unset, a theme’s nautilus.css can choose it with --nautilus-sidebar-opacity.</description>
+      <description>How opaque the transparent sidebar is, from 0 (clear) to 1 (solid). A theme’s nautilus.css cannot change it.</description>
     </key>
     <!-- end fork -->
     <key name="show-directory-item-counts" enum="org.gnome.nautilus.SpeedTradeoff">
