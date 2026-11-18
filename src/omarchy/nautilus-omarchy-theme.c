@@ -16,13 +16,14 @@
  * generated colours, so it only needs the variables it changes.
  *
  * Sidebar. With the transparent-sidebar key on, the sidebar's background is
- * drawn at the sidebar-opacity key's alpha (its text never fades). A faded
- * sidebar over the window's own background would only blend into that
+ * drawn at the sidebar-opacity key's alpha (its text never fades). Both keys
+ * are Files' own settings, independent of Omarchy: the opacity is stated in a
+ * provider above the theme's, so a theme's nautilus.css can't change it. A
+ * faded sidebar over the window's own background would only blend into that
  * colour, so the window's background is cleared too and the content pane is
- * painted again, leaving only the sidebar see-through. Until the user moves
- * the slider, the theme's --nautilus-sidebar-opacity decides the opacity.
- * When the window is narrow the sidebar overlays the files instead of sitting
- * beside them, and stays opaque.
+ * painted again, leaving only the sidebar see-through. When the window is
+ * narrow the sidebar overlays the files instead of sitting beside them, and
+ * stays opaque.
  *
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
@@ -35,6 +36,7 @@
 #include "nautilus-omarchy-palette.h"
 
 #define TRANSPARENT_CLASS "nautilus-omarchy-transparent"
+#define SIDEBAR_OPACITY "--nautilus-sidebar-opacity"
 #define SPLIT_VIEW_KEY "nautilus-omarchy-split-view"
 #define RELOAD_DELAY_MS 120
 
@@ -48,10 +50,10 @@ static const char *sidebar_css =
     "  background-color: transparent;\n"
     "}\n"
     "window." TRANSPARENT_CLASS " overlay-split-view > .sidebar-pane {\n"
-    "  background-color: alpha(var(--sidebar-bg-color), var(" NAUTILUS_OMARCHY_SIDEBAR_OPACITY "));\n"
+    "  background-color: alpha(var(--sidebar-bg-color), var(" SIDEBAR_OPACITY "));\n"
     "}\n"
     "window." TRANSPARENT_CLASS " overlay-split-view > .sidebar-pane:backdrop {\n"
-    "  background-color: alpha(var(--sidebar-backdrop-color), var(" NAUTILUS_OMARCHY_SIDEBAR_OPACITY "));\n"
+    "  background-color: alpha(var(--sidebar-backdrop-color), var(" SIDEBAR_OPACITY "));\n"
     "}\n"
     "window." TRANSPARENT_CLASS " overlay-split-view > .content-pane {\n"
     "  background-color: var(--view-bg-color);\n"
@@ -65,10 +67,6 @@ typedef struct
     GtkCssProvider *sidebar;
     GPtrArray *monitors;
     guint pending;
-
-    /* What the theme's own CSS sets the sidebar's opacity to, if anything. */
-    gboolean theme_sets_opacity;
-    double theme_opacity;
 
     /* The preferences dialog's slider while it is open. */
     GtkAdjustment *opacity_adjustment;
@@ -135,13 +133,6 @@ theme_display_name (void)
 static double
 effective_opacity (void)
 {
-    g_autoptr (GVariant) user_value = g_settings_get_user_value (nautilus_preferences,
-                                                                 NAUTILUS_PREFERENCES_SIDEBAR_OPACITY);
-
-    if (user_value == NULL && theme->theme_sets_opacity)
-    {
-        return theme->theme_opacity;
-    }
     return CLAMP (g_settings_get_double (nautilus_preferences,
                                          NAUTILUS_PREFERENCES_SIDEBAR_OPACITY),
                   0.0, 1.0);
@@ -201,7 +192,7 @@ sync_sidebar (void)
     g_autofree char *css = NULL;
 
     g_ascii_formatd (number, sizeof number, "%.3f", effective_opacity ());
-    css = g_strdup_printf (":root { " NAUTILUS_OMARCHY_SIDEBAR_OPACITY ": %s; }\n%s",
+    css = g_strdup_printf (":root { " SIDEBAR_OPACITY ": %s; }\n%s",
                            number, sidebar_css);
     gtk_css_provider_load_from_string (theme->sidebar, css);
 
@@ -246,7 +237,6 @@ reload (void)
     }
 
     gtk_css_provider_load_from_string (theme->palette, css->str);
-    theme->theme_sets_opacity = nautilus_omarchy_sidebar_opacity_in (css->str, &theme->theme_opacity);
 
     adw_style_manager_set_color_scheme (adw_style_manager_get_default (),
                                         !loaded ? ADW_COLOR_SCHEME_DEFAULT :
@@ -407,7 +397,7 @@ nautilus_omarchy_theme_init (GtkApplication *application)
     theme->monitors = g_ptr_array_new_with_free_func (g_object_unref);
 
     /* Above the app's own style.css; the sidebar's opacity above the theme,
-     * since the effective value already accounts for what the theme says. */
+     * which has no say in it. */
     theme->palette = gtk_css_provider_new ();
     g_signal_connect (theme->palette, "parsing-error", G_CALLBACK (on_parsing_error), NULL);
     gtk_style_context_add_provider_for_display (display, GTK_STYLE_PROVIDER (theme->palette),

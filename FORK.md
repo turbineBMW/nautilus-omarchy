@@ -24,11 +24,10 @@ view stays solid. When the window is too narrow for the sidebar to sit beside
 the files, it overlays them instead and stays opaque. The file chooser portal
 window behaves the same way.
 
-How see-through: the *Sidebar Opacity* slider, 0–100%. Until you move it, the
-theme decides with `:root { --nautilus-sidebar-opacity: 0.8; }` in its
-`nautilus.css` (a number from 0 to 1, not a percentage), and failing that it is
-80%. Once you move it, your value wins over every theme; the ↶ button next to
-the slider hands the choice back to the theme.
+How see-through: the *Sidebar Opacity* slider, 0–100% (80% by default; the ↶
+button next to it goes back to that). Both are Files' own settings, independent
+of Omarchy: a theme's `nautilus.css` can't change them, because Files states
+`--nautilus-sidebar-opacity` in a style provider above the theme's.
 
 **Preferences → General → Appearance:**
 
@@ -41,7 +40,7 @@ the slider hands the choice back to the theme.
 ```sh
 gsettings set org.gnome.nautilus.preferences transparent-sidebar true
 gsettings set org.gnome.nautilus.preferences sidebar-opacity 0.7
-gsettings reset org.gnome.nautilus.preferences sidebar-opacity   # back to the theme's
+gsettings reset org.gnome.nautilus.preferences sidebar-opacity   # back to 80%
 ```
 
 ## Branches
@@ -84,15 +83,15 @@ when Arch ships the matching `gtk4`, `libadwaita` and `libnautilus-extension`.
 
 Everything substantial is in new files, which cannot conflict:
 
-- `src/omarchy/nautilus-omarchy-palette.c`: colors.toml → libadwaita CSS, and
-  the `--nautilus-sidebar-opacity` parser. A C port of Bubo's
+- `src/omarchy/nautilus-omarchy-palette.c`: colors.toml → libadwaita CSS. A
+  C port of Bubo's
   `src/omarchy/palette.rs` (itself from Rustle's `rustle-core`); keep them in
   step. Its output was checked byte for byte against Bubo's for every theme on
   this machine.
 - `src/omarchy/nautilus-omarchy-theme.c`: CSS providers, light/dark forcing,
   the theme directory monitors, per-window transparency, and the Appearance
   rows of Preferences.
-- `test/displayless/test-omarchy-palette.c`: tests for the palette and parser.
+- `test/displayless/test-omarchy-palette.c`: tests for the palette.
 - `packaging/`, `install.sh`, `uninstall.sh`, `scripts/sync-upstream.sh`, this file.
 
 The hooks into upstream files are each marked `fork`:
